@@ -1,0 +1,29 @@
+﻿@page
+@model TriviaWebRazorPages.Pages.QuizModel
+
+<h2>Trivia Quiz</h2>
+
+@if (Model.CurrentQuestion == null)
+{
+    <p>Geen vraag geladen.</p>
+}
+else
+{
+    <div>
+        <h3>@Model.CurrentQuestion.Text</h3>
+
+        <form method="post">
+            @for (int i = 0; i < Model.CurrentQuestion.Choices.Count; i++)
+            {
+                <button type="submit" name="choiceIndex" value="@i">
+                    @Model.CurrentQuestion.Choices[i].Text
+                </button>
+            }
+        </form>
+
+        @if (!string.IsNullOrEmpty(Model.AnswerResult))
+        {
+            <p style="color:green">@Model.AnswerResult</p>
+        }
+    </div>
+}

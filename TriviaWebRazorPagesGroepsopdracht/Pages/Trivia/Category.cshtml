@@ -1,0 +1,52 @@
+﻿@page
+@model TriviaWebRazorPages.Pages.Trivia.CategoryModel
+@{
+    ViewData["Title"] = $"Categorie: {Model.Category}";
+}
+
+<h2>Gekozen categorie: @Model.Category</h2>
+
+@if (Model.CurrentQuestion != null)
+{
+    <div>
+        <h3>@Model.CurrentQuestion.Text</h3>
+
+        <!-- Antwoorden -->
+        <form method="post">
+            @{
+                int idx = 0;
+            }
+            @foreach (var choice in Model.CurrentQuestion.Choices)
+            {
+                <button type="submit" name="choiceIndex" value="@idx" class="btn btn-primary m-1">
+                    @choice.Text
+                </button>
+                idx++;
+            }
+        </form>
+
+        <!-- Feedback, dus wanneer de goede/foute antwoord wordt gekozen -->
+        @if (!string.IsNullOrEmpty(Model.AnswerResult))
+        {
+            <p class="mt-2" style="color:green">@Model.AnswerResult</p>
+        }
+
+        <!-- Volgende vraag -->
+        @if (Model.QuestionsInCategory != null && Model.QuestionsInCategory.Count > 1)
+        {
+            <form method="get" class="mt-2">
+                <input type="hidden" name="category" value="@Model.Category" />
+
+                <!-- dus dit maakt dat het naar de volgend id gaat: door de value die de Model.CurrentQuestionIndex pakt + 1" -->
+                <input type="hidden" name="CurrentQuestionIndex" value="@(Model.CurrentQuestionIndex + 1)" />
+
+                <!-- Elke keer dat de button wordt geklikt dan gaat het naar de volgende Id -->
+                <button type="submit" class="btn btn-secondary">Volgende vraag</button>
+            </form>
+        }
+    </div>
+}
+else 
+{
+    <p>Geen vraag beschikbaar voor deze categorie.</p>
+}
