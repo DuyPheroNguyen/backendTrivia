@@ -7,21 +7,21 @@ namespace TriviaWebRazorPages.Pages
 {
     public class TriviaModel : PageModel
     {
-        private readonly ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;      // database context
 
-        public List<Question> Questions { get; set; } = new();
+        public List<Question> Questions { get; set; } = new(); // lijst van alle vragen
 
-        public TriviaModel(ApplicationDbContext db)
+        public TriviaModel(ApplicationDbContext db) // constructor met database context injectie
         {
             _db = db;
         }
 
-        public void OnGet()
+        public void OnGet() // bij het laden van de pagina
         {
-            Questions = _db.Questions
-                .Include(q => q.Category)
-                .Include(q => q.Choices)
-                .ToList();
+            Questions = _db.Questions // haal alle vragen op
+                .Include(q => q.Category) // inclusief categorie
+                .Include(q => q.Choices) // inclusief keuzes
+                .ToList(); // zet om naar lijst
         }
     }
 }

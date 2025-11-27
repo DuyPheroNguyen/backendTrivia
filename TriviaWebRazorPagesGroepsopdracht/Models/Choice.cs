@@ -2,11 +2,11 @@
 {
     public class Choice
     {
-        public int Id { get; set; }
+        public int Id { get; set; }    // primary key
         public int Question_Id { get; set; }     // foreign key
         public string Text { get; set; } = string.Empty;         // mogelijk antwoord
         public bool Is_Correct { get; set; }     // true / false
 
-        public Question? Question { get; set; }
+        public Question? Question { get; set; } // de vraag waar dit antwoord bij hoort
     }
 }

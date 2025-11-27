@@ -1,30 +1,30 @@
 ﻿public class Category
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public int Id { get; set; } // primary key
+    public string Name { get; set; } = string.Empty; // naam van de categorie
 
-    public ICollection<Question> Questions { get; set; } = new List<Question>();
+    public ICollection<Question> Questions { get; set; } = new List<Question>(); // alle vragen in deze categorie
 }
 
 public class Question
 {
-    public int Id { get; set; }
-    public int Category_Id { get; set; }
-    public string Text { get; set; } = string.Empty;
-    public string Difficulty { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public string Explanation { get; set; } = string.Empty;
+    public int Id { get; set; } //  primary key
+    public int Category_Id { get; set; } // foreign key
+    public string Text { get; set; } = string.Empty; // de vraag zelf
+    public string Difficulty { get; set; } = string.Empty; // makkelijk, gemiddeld, moeilijk
+    public string Type { get; set; } = string.Empty; // multiple choice of iets anders
+    public string Explanation { get; set; } = string.Empty; // optioneel
 
-    public Category? Category { get; set; }
-    public ICollection<Choice> Choices { get; set; } = new List<Choice>();
+    public Category? Category { get; set; } // de categorie waar deze vraag bij hoort
+    public ICollection<Choice> Choices { get; set; } = new List<Choice>(); // mogelijke antwoorden
 }
 
-public class Choice
+public class Choice 
 {
-    public int Id { get; set; }
-    public int Question_Id { get; set; }
-    public string Text { get; set; } = string.Empty;
-    public bool Is_Correct { get; set; }
+    public int Id { get; set; }     // primary key
+    public int Question_Id { get; set; }    // foreign key
+    public string Text { get; set; } = string.Empty;        // mogelijk antwoord
+    public bool Is_Correct { get; set; }    // true / false
 
-    public Question? Question { get; set; }
+    public Question? Question { get; set; } // de vraag waar dit antwoord bij hoort
 }

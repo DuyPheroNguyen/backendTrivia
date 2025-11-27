@@ -15,7 +15,7 @@ var app = builder.Build();
 // Geen EnsureCreated, want database bestaat al
 // Zorg alleen dat connectie werkt
 
-if (!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment()) 
 {
     app.UseExceptionHandler("/Error");
 }
