@@ -6,41 +6,51 @@
 
 <h2>Gekozen categorie: @Model.Category</h2>
 
+<div class="mb-3">
+    <span class="badge bg-info">Vraag @(Model.CurrentQuestionIndex + 1) van @Model.TotalQuestions</span>
+</div>
+
 @if (Model.CurrentQuestion != null)
 {
     <div>
         <h3>@Model.CurrentQuestion.Text</h3>
+        <p class="text-muted">Moeilijkheid: @Model.CurrentQuestion.Difficulty</p>
 
         <!-- Antwoorden -->
         <form method="post">
             @{
                 int idx = 0;
             }
-            @foreach (var choice in Model.CurrentQuestion.Choices)
+            @foreach (var choice in Model.CurrentChoices)
             {
-                <button type="submit" name="choiceIndex" value="@idx" class="btn btn-primary m-1">
+                <button type="submit" name="choiceIndex" value="@idx" class="btn btn-outline-primary m-1">
                     @choice.Text
                 </button>
                 idx++;
             }
         </form>
 
-        <!-- Feedback, dus wanneer de goede/foute antwoord wordt gekozen -->
+        <!-- Feedback -->
         @if (!string.IsNullOrEmpty(Model.AnswerResult))
         {
-            <p class="mt-2" style="color:green">@Model.AnswerResult</p>
+            <div class="alert @(Model.AnswerResult.Contains("Correct") ? "alert-success" : "alert-danger") mt-3">
+                @Model.AnswerResult
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.CurrentQuestion.Explanation))
+            {
+                <div class="alert alert-info">
+                    <strong>Uitleg:</strong> @Model.CurrentQuestion.Explanation
+                </div>
+            }
         }
 
         <!-- Volgende vraag -->
         @if (Model.QuestionsInCategory != null && Model.QuestionsInCategory.Count > 1)
         {
-            <form method="get" class="mt-2">
+            <form method="get" class="mt-3">
                 <input type="hidden" name="category" value="@Model.Category" />
-
-                <!-- dus dit maakt dat het naar de volgend id gaat: door de value die de Model.CurrentQuestionIndex pakt + 1" -->
                 <input type="hidden" name="CurrentQuestionIndex" value="@(Model.CurrentQuestionIndex + 1)" />
-
-                <!-- Elke keer dat de button wordt geklikt dan gaat het naar de volgende Id -->
                 <button type="submit" class="btn btn-secondary">Volgende vraag</button>
             </form>
         }

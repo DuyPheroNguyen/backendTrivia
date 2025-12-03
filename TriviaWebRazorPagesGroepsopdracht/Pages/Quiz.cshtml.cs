@@ -6,52 +6,74 @@ namespace TriviaWebRazorPages.Pages
     public class QuizModel : PageModel
     {
         [BindProperty]
-        public int? ChoiceIndex { get; set; }   // index van aangeklikte keuze
+        public int? ChoiceIndex { get; set; }
 
-        public Question CurrentQuestion { get; set; } = default!; // de huidige vraag die getoond wordt
-        public string? AnswerResult { get; set; } // resultaat van het antwoord, dus goed/fout is
+        [BindProperty(SupportsGet = true)]
+        public int CurrentQuestionIndex { get; set; } = 0;
 
-        public void OnGet() // bij het laden van de pagina
+        public Question? CurrentQuestion { get; set; }
+        public List<Choice> CurrentChoices { get; set; } = new();
+        public List<Question> AllQuestions { get; set; } = new();
+        public string? AnswerResult { get; set; }
+        public int Score { get; set; } = 0;
+
+        public async Task OnGetAsync()
         {
-            LoadQuestion(); // Laad een voorbeeldvraag
+            await LoadRandomQuestionAsync();
+            Score = (int)(TempData["Score"] ?? 0);
+            TempData.Keep("Score");
         }
 
-        public void OnPost() // bij het versturen van een gekozen antwoord
+        public async Task OnPostAsync()
         {
-            LoadQuestion(); // Zorg dat CurrentQuestion gevuld blijft
+            await LoadRandomQuestionAsync();
 
-            if (ChoiceIndex.HasValue && ChoiceIndex.Value >= 0 && ChoiceIndex.Value < CurrentQuestion.Choices.Count) // controleer of de gekozen index geldig is
+            if (ChoiceIndex.HasValue && CurrentChoices.Any())
             {
-                var selected = CurrentQuestion.Choices[ChoiceIndex.Value]; // de gekozen keuze
-                AnswerResult = selected.Is_Correct ? "Correct!" : "Helaas, fout antwoord."; // bepaal of het correct is
+                if (ChoiceIndex.Value >= 0 && ChoiceIndex.Value < CurrentChoices.Count)
+                {
+                    var selected = CurrentChoices[ChoiceIndex.Value];
+                    AnswerResult = selected.Is_Correct ? "Correct!" : "Helaas, fout antwoord.";
+                    
+                    Score = (int)(TempData["Score"] ?? 0);
+                    if (selected.Is_Correct)
+                    {
+                        Score++;
+                    }
+                    TempData["Score"] = Score;
+                }
             }
         }
 
-        private void LoadQuestion() // Laad een voorbeeldvraag
+        private async Task LoadRandomQuestionAsync()
         {
-            // Mock data
-            CurrentQuestion = new Question // voorbeeldvraag
+            try
             {
-                Text = "Wat is de hoofdstad van België?", // de vraag zelf
-                Choices = new List<Choice> //   mogelijke antwoorden
+                await SupabaseService.InitializeAsync();
+
+                var questionsResponse = await SupabaseService.Client
+                    .From<Question>()
+                    .Get();
+
+                AllQuestions = questionsResponse.Models;
+
+                if (AllQuestions.Any())
                 {
-                    new Choice { Text = "Brussel", Is_Correct = true }, // correct antwoord
-                    new Choice { Text = "Antwerpen", Is_Correct = false }, // fout antwoord
-                    new Choice { Text = "Gent", Is_Correct = false }    // fout antwoord
-                }   
-            };
-        }
+                    var questionIndex = CurrentQuestionIndex % AllQuestions.Count;
+                    CurrentQuestion = AllQuestions[questionIndex];
 
-        public class Question // de vraag Category
-        {
-            public string Text { get; set; } = string.Empty; // de vraag zelf
-            public List<Choice> Choices { get; set; } = new(); // mogelijke antwoorden
-        }
+                    var choicesResponse = await SupabaseService.Client
+                        .From<Choice>()
+                        .Where(c => c.Question_Id == CurrentQuestion.Id)
+                        .Get();
 
-        public class Choice // mogelijke antwoorden
-        {
-            public string Text { get; set; } = string.Empty; // het antwoord zelf
-            public bool Is_Correct { get; set; }    // of het correct is, want in de database staat dit ook (true/false)
+                    CurrentChoices = choicesResponse.Models;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading question: {ex.Message}");
+            }
         }
     }
 }

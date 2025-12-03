@@ -1,29 +1,18 @@
 ﻿@page
 @model TriviaWebRazorPages.Pages.TriviaModel
 
-<h2>Alle Trivia Vragen</h2>
+<h2>Trivia Categorieën</h2>
 
-@foreach (var q in Model.Questions)
-{
-    <div style="margin-bottom:20px;">
-        <h3>@q.Text</h3>
-
-        <p><b>Categorie:</b> @q.Category.Name</p>
-        <p><b>Moeilijkheid:</b> @q.Difficulty</p>
-
-        <ul>
-            @foreach (var c in q.Choices)
-            {
-                <li>
-                    @c.Text
-                    @if (c.Is_Correct)
-                    {
-                        <b>(correct)</b>
-                    }
-                </li>
-            }
-        </ul>
-    </div>
-
-    <hr />
-}
+<div class="row">
+    @foreach (var category in Model.Categories)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@category.Name</h5>
+                    <a href="/Trivia/Category?category=@category.Name" class="btn btn-primary">Start Quiz</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

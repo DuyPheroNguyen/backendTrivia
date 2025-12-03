@@ -5,33 +5,49 @@ using Postgrest.Models;
 public class Category : BaseModel
 {
     [PrimaryKey("id")]
-    public int Id { get; set; } // primary key
+    public int Id { get; set; }
     
     [Column("name")]
-    public string Name { get; set; } = string.Empty; // naam van de categorie
-
-    public ICollection<Question> Questions { get; set; } = new List<Question>(); // alle vragen in deze categorie
+    public string Name { get; set; } = string.Empty;
 }
 
-public class Question
+[Table("question")]
+public class Question : BaseModel
 {
-    public int Id { get; set; } //  primary key
-    public int Category_Id { get; set; } // foreign key
-    public string Text { get; set; } = string.Empty; // de vraag zelf
-    public string Difficulty { get; set; } = string.Empty; // makkelijk, gemiddeld, moeilijk
-    public string Type { get; set; } = string.Empty; // multiple choice of iets anders
-    public string Explanation { get; set; } = string.Empty; // optioneel
-
-    public Category? Category { get; set; } // de categorie waar deze vraag bij hoort
-    public ICollection<Choice> Choices { get; set; } = new List<Choice>(); // mogelijke antwoorden
+    [PrimaryKey("id")]
+    public int Id { get; set; }
+    
+    [Column("category_id")]
+    public int Category_Id { get; set; }
+    
+    [Column("text")]
+    public string Text { get; set; } = string.Empty;
+    
+    [Column("difficulty")]
+    public string Difficulty { get; set; } = string.Empty;
+    
+    [Column("type")]
+    public string Type { get; set; } = string.Empty;
+    
+    [Column("answer")]
+    public string Answer { get; set; } = string.Empty;
+    
+    [Column("explanation")]
+    public string? Explanation { get; set; }
 }
 
-public class Choice 
+[Table("choice")]
+public class Choice : BaseModel
 {
-    public int Id { get; set; }     // primary key
-    public int Question_Id { get; set; }    // foreign key
-    public string Text { get; set; } = string.Empty;        // mogelijk antwoord
-    public bool Is_Correct { get; set; }    // true / false
-
-    public Question? Question { get; set; } // de vraag waar dit antwoord bij hoort
+    [PrimaryKey("id")]
+    public int Id { get; set; }
+    
+    [Column("question_id")]
+    public int Question_Id { get; set; }
+    
+    [Column("text")]
+    public string Text { get; set; } = string.Empty;
+    
+    [Column("is_correct")]
+    public bool Is_Correct { get; set; }
 }
