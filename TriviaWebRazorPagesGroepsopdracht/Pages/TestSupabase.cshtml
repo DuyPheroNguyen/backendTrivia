@@ -1,0 +1,49 @@
+@page
+@model TriviaWebRazorPagesGroepsopdracht.Pages.TestSupabaseModel
+@{
+    ViewData["Title"] = "Test Supabase";
+}
+
+<div class="container mt-5">
+    <h1>Supabase Connection Test</h1>
+    
+    @if (Model.IsConnected)
+    {
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">✅ Connectie succesvol!</h4>
+            <p>De verbinding met Supabase is actief.</p>
+            <hr>
+            <p class="mb-0">Gevonden categorieën: <strong>@Model.CategoryCount</strong></p>
+        </div>
+        
+        @if (Model.Categories != null && Model.Categories.Any())
+        {
+            <h3 class="mt-4">Categorieën in database:</h3>
+            <ul class="list-group">
+                @foreach (var category in Model.Categories)
+                {
+                    <li class="list-group-item">
+                        <strong>ID:</strong> @category.Id - 
+                        <strong>Naam:</strong> @category.Name
+                    </li>
+                }
+            </ul>
+        }
+    }
+    else
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">❌ Connectie mislukt</h4>
+            <p>Er kon geen verbinding gemaakt worden met Supabase.</p>
+            <hr>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <p class="mb-0"><strong>Error:</strong> @Model.ErrorMessage</p>
+            }
+        </div>
+    }
+    
+    <div class="mt-4">
+        <a asp-page="/Index" class="btn btn-primary">Terug naar Home</a>
+    </div>
+</div>

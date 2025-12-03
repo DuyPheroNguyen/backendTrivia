@@ -1,6 +1,13 @@
-﻿public class Category
+﻿using Postgrest.Attributes;
+using Postgrest.Models;
+
+[Table("category")]
+public class Category : BaseModel
 {
+    [PrimaryKey("id")]
     public int Id { get; set; } // primary key
+    
+    [Column("name")]
     public string Name { get; set; } = string.Empty; // naam van de categorie
 
     public ICollection<Question> Questions { get; set; } = new List<Question>(); // alle vragen in deze categorie

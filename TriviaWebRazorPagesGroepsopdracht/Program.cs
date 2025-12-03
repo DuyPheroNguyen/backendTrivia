@@ -1,19 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using TriviaWebRazorPages.Data;
 
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Razor Pages
 builder.Services.AddRazorPages();
 
-// EF Core SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
-
-// Geen EnsureCreated, want database bestaat al
-// Zorg alleen dat connectie werkt
 
 if (!app.Environment.IsDevelopment()) 
 {
