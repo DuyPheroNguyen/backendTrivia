@@ -1,71 +1,96 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using TriviaWebRazorPages.Data;
-using TriviaWebRazorPages.Models;
 
 namespace TriviaWebRazorPages.Pages.Trivia
 {
     public class CategoryModel : PageModel
     {
-        private readonly ApplicationDbContext _db;
+        [BindProperty(SupportsGet = true)]
+        public string? Category { get; set; }
 
-        public CategoryModel(ApplicationDbContext db) 
+        [BindProperty(SupportsGet = true)]
+        public int CurrentQuestionIndex { get; set; } = 0;
+
+        [BindProperty]
+        public int? ChoiceIndex { get; set; }
+
+        public Question? CurrentQuestion { get; set; }
+        public List<Choice> CurrentChoices { get; set; } = new();
+        public List<Question> QuestionsInCategory { get; set; } = new();
+        public string? AnswerResult { get; set; }
+        public int Score { get; set; } = 0;
+        public int TotalQuestions { get; set; } = 0;
+
+        public async Task OnGetAsync()
         {
-            _db = db;
+            await LoadQuestionsAsync();
         }
 
-        [BindProperty(SupportsGet = true)] // zodat we de categorie via query string kunnen ontvangen
-        public string? Category { get; set; } // de gekozen categorie naam
-
-        [BindProperty(SupportsGet = true)] // om de huidige vraagindex bij te houden via query string
-        public int CurrentQuestionIndex { get; set; } = 0; // standaard op 0 zetten (eerste vraag van elke category gepakt)
-
-        [BindProperty] // om de gekozen antwoordindex te binden bij post
-        public int? ChoiceIndex { get; set; } // index van aangeklikte keuze (dus de verschillende genre die wordt geklikt)
-
-        public Question? CurrentQuestion { get; set; }  // de huidige vraag die getoond wordt
-        public List<Question> QuestionsInCategory { get; set; } = new(); // alle vragen in de gekozen categorie gepakt
-        public string? AnswerResult { get; set; } // resultaat van het antwoord, dus goed/fout is
-
-        public void OnGet() // bij het laden van de pagina
+        public async Task OnPostAsync()
         {
-            LoadQuestions(); // laadt ALLE vragen van de gekozen categorie
-        }
+            await LoadQuestionsAsync();
 
-        public void OnPost() // bij het versturen van een gekozen antwoord
-        {
-            LoadQuestions(); // laadt ALLE vragen van de gekozen categorie
-
-            if (ChoiceIndex.HasValue && CurrentQuestion != null) // controleer of er een keuze is gemaakt en of er een huidige vraag is
+            if (ChoiceIndex.HasValue && CurrentQuestion != null && CurrentChoices.Any())
             {
-                // ICollection naar List voor index
-                var choices = CurrentQuestion.Choices.ToList(); // keuzes van de huidige vraag
-
-                if (ChoiceIndex.Value >= 0 && ChoiceIndex.Value < choices.Count) // controleer of de gekozen index geldig is
+                if (ChoiceIndex.Value >= 0 && ChoiceIndex.Value < CurrentChoices.Count)
                 {
-                    var selected = choices[ChoiceIndex.Value]; // de gekozen keuze
-                    AnswerResult = selected.Is_Correct ? "Correct!" : "Helaas, fout antwoord."; // bepaal of het correct is
+                    var selected = CurrentChoices[ChoiceIndex.Value];
+                    AnswerResult = selected.Is_Correct ? "Correct!" : "Helaas, fout antwoord.";
+                    
+                    if (selected.Is_Correct)
+                    {
+                        Score = (int)(TempData["Score"] ?? 0) + 1;
+                        TempData["Score"] = Score;
+                    }
                 }
             }
         }
 
-        private void LoadQuestions() // laadt ALLE vragen van de gekozen categorie
+        private async Task LoadQuestionsAsync()
         {
-            if (string.IsNullOrEmpty(Category)) //  controleer of er een categorie is opgegeven
+            if (string.IsNullOrEmpty(Category))
                 return;
 
-            // Haal ALLE vragen van de categorie
-            QuestionsInCategory = _db.Questions
-                .Include(q => q.Choices) // inclusief keuzes
-                .Include(q => q.Category) // inclusief categorie
-                .Where(q => q.Category.Name == Category) // filter op categorie naam
-                .ToList(); // zet om naar lijst
-
-            if (QuestionsInCategory.Any()) // controleer of er vragen zijn in de categorie
+            try
             {
-                // Gebruik CurrentQuestionIndex om de juiste vraag te tonen
-                CurrentQuestion = QuestionsInCategory[CurrentQuestionIndex % QuestionsInCategory.Count];
+                await SupabaseService.InitializeAsync();
+
+                // Get category by name
+                var categoryResponse = await SupabaseService.Client
+                    .From<global::Category>()
+                    .Where(c => c.Name == Category)
+                    .Get();
+
+                if (!categoryResponse.Models.Any())
+                    return;
+
+                var categoryId = categoryResponse.Models.First().Id;
+
+                // Get questions for this category
+                var questionsResponse = await SupabaseService.Client
+                    .From<Question>()
+                    .Where(q => q.Category_Id == categoryId)
+                    .Get();
+
+                QuestionsInCategory = questionsResponse.Models;
+                TotalQuestions = QuestionsInCategory.Count;
+
+                if (QuestionsInCategory.Any())
+                {
+                    CurrentQuestion = QuestionsInCategory[CurrentQuestionIndex % QuestionsInCategory.Count];
+
+                    // Get choices for current question
+                    var choicesResponse = await SupabaseService.Client
+                        .From<Choice>()
+                        .Where(c => c.Question_Id == CurrentQuestion.Id)
+                        .Get();
+
+                    CurrentChoices = choicesResponse.Models;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading questions: {ex.Message}");
             }
         }
     }
