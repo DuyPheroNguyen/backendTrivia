@@ -6,7 +6,7 @@ namespace TriviaWebRazorPages.Pages.Trivia
     public class CategoryModel : PageModel
     {
         [BindProperty(SupportsGet = true)]
-        public string? Category { get; set; }
+        public string? Category { get; set; }  // filter op naam zoals eerst
 
         [BindProperty(SupportsGet = true)]
         public int CurrentQuestionIndex { get; set; } = 0;
@@ -36,7 +36,7 @@ namespace TriviaWebRazorPages.Pages.Trivia
                 {
                     var selected = CurrentChoices[ChoiceIndex.Value];
                     AnswerResult = selected.Is_Correct ? "Correct!" : "Helaas, fout antwoord.";
-                    
+
                     if (selected.Is_Correct)
                     {
                         Score = (int)(TempData["Score"] ?? 0) + 1;
@@ -48,14 +48,13 @@ namespace TriviaWebRazorPages.Pages.Trivia
 
         private async Task LoadQuestionsAsync()
         {
-            if (string.IsNullOrEmpty(Category))
-                return;
+            if (string.IsNullOrEmpty(Category)) return;
 
             try
             {
                 await SupabaseService.InitializeAsync();
 
-                // Get category by name
+                // Haal categorie op basis van naam
                 var categoryResponse = await SupabaseService.Client
                     .From<global::Category>()
                     .Where(c => c.Name == Category)
@@ -66,7 +65,7 @@ namespace TriviaWebRazorPages.Pages.Trivia
 
                 var categoryId = categoryResponse.Models.First().Id;
 
-                // Get questions for this category
+                // Haal vragen op voor deze categorie
                 var questionsResponse = await SupabaseService.Client
                     .From<Question>()
                     .Where(q => q.Category_Id == categoryId)
@@ -79,7 +78,7 @@ namespace TriviaWebRazorPages.Pages.Trivia
                 {
                     CurrentQuestion = QuestionsInCategory[CurrentQuestionIndex % QuestionsInCategory.Count];
 
-                    // Get choices for current question
+                    // Haal keuzes voor de huidige vraag
                     var choicesResponse = await SupabaseService.Client
                         .From<Choice>()
                         .Where(c => c.Question_Id == CurrentQuestion.Id)
