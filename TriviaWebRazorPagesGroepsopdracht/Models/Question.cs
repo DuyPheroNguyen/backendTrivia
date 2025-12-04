@@ -1,15 +1,30 @@
-﻿namespace TriviaWebRazorPages.Models
-{
-    public class Question
-    {
-        public int Id { get; set; }                      // primary key
-        public int Category_Id { get; set; }        // foreign key
-        public string Text { get; set; } = string.Empty;           // de vraag zelf
-        public string Difficulty { get; set; } = string.Empty;      // makkelijk, gemiddeld, moeilijk
-        public string Type { get; set; } = string.Empty;            // multiple choice of iets anders
-        public string Explanation { get; set; } = string.Empty;     // optioneel
+﻿using Postgrest.Attributes;
+using Postgrest.Models;
 
-        public Category? Category { get; set; }        // de categorie waar deze vraag bij hoort
-        public List<Choice>? Choices { get; set; } = new();      // mogelijke antwoorden
+namespace TriviaWebRazorPages.Models
+{
+    [Table("question")]
+    public class Question : BaseModel
+    {
+        [PrimaryKey("id")]
+        public int Id { get; set; }
+
+        [Column("category_id")]
+        public int Category_Id { get; set; }
+
+        [Column("text")]
+        public string Text { get; set; } = string.Empty;
+
+        [Column("difficulty")]
+        public string Difficulty { get; set; } = string.Empty;
+
+        [Column("type")]
+        public string Type { get; set; } = string.Empty;
+
+        [Column("answer")]
+        public string Answer { get; set; } = string.Empty;
+
+        [Column("explanation")]
+        public string? Explanation { get; set; }
     }
 }

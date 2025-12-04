@@ -1,12 +1,21 @@
-﻿namespace TriviaWebRazorPages.Models
-{
-    public class Choice
-    {
-        public int Id { get; set; }    // primary key
-        public int Question_Id { get; set; }     // foreign key
-        public string Text { get; set; } = string.Empty;         // mogelijk antwoord
-        public bool Is_Correct { get; set; }     // true / false
+﻿using Postgrest.Attributes;
+using Postgrest.Models;
 
-        public Question? Question { get; set; } // de vraag waar dit antwoord bij hoort
+namespace TriviaWebRazorPages.Models
+{
+    [Table("choice")]
+    public class Choice : BaseModel
+    {
+        [PrimaryKey("id")]
+        public int Id { get; set; }
+
+        [Column("question_id")]
+        public int Question_Id { get; set; }
+
+        [Column("text")]
+        public string Text { get; set; } = string.Empty;
+
+        [Column("is_correct")]
+        public bool Is_Correct { get; set; }
     }
 }

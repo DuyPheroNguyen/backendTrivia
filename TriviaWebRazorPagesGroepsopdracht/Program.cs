@@ -1,18 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using TriviaWebRazorPages.Data;
+using DotNetEnv;
 
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Razor Pages
 builder.Services.AddRazorPages();
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment()) 
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }

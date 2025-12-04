@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using TriviaWebRazorPages.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TriviaWebRazorPages.Pages
 {
@@ -11,16 +14,15 @@ namespace TriviaWebRazorPages.Pages
             try
             {
                 await SupabaseService.InitializeAsync();
-                
+
                 var response = await SupabaseService.Client
                     .From<Category>()
                     .Get();
 
                 Categories = response.Models;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error loading categories: {ex.Message}");
                 Categories = new List<Category>();
             }
         }
